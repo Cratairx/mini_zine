@@ -1,0 +1,299 @@
+:root {
+    --bg: #f4f1ea;
+    --paper: #ffffff;
+    --ink: #222;
+    --muted: #8a8a8a;
+    --line: #c9c9c9;
+    --accent: #2bb5ad;
+    --danger: #d9534f;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+}
+
+button {
+    font: inherit;
+    border: 0;
+    border-radius: 10px;
+    padding: 10px 14px;
+    min-height: 44px;
+    background: var(--paper);
+    color: var(--ink);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .15);
+    cursor: pointer;
+}
+
+button:active {
+    transform: scale(.97);
+}
+
+.topbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 12px 16px;
+}
+
+.topbar h1 {
+    margin: 0;
+    font-size: 1.4rem;
+}
+
+.actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+main {
+    padding: 0 16px 120px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.hint {
+    margin: 0 0 8px;
+    color: #555;
+}
+
+.tip {
+    margin: 0 0 12px;
+    padding: 10px 14px;
+    background: #e3f6f5;
+    border-left: 4px solid var(--accent);
+    border-radius: 8px;
+    color: #234;
+}
+
+.option {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-top: 12px;
+    color: #555;
+}
+
+/* ---------- The A4 sheet ---------- */
+
+.sheet {
+    width: 100%;
+    aspect-ratio: 297 / 210;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+    background: var(--paper);
+    box-shadow: 0 4px 18px rgba(0, 0, 0, .15);
+}
+
+.panel {
+    position: relative;
+    overflow: hidden;
+    border: 1px dashed var(--line);
+    cursor: pointer;
+    user-select: none;
+}
+
+.panel.selected {
+    outline: 3px solid var(--accent);
+    outline-offset: -3px;
+    z-index: 1;
+}
+
+/*
+ * The frame is the box the picture must fit inside. It is a size container so the
+ * image can use cqw/cqh (1% of the frame's width/height).
+ */
+.frame {
+    position: absolute;
+    inset: 0;
+    container-type: size;
+}
+
+/*
+ * Never stretched: object-fit scales the picture evenly. By default the whole picture shows
+ * (contain). Pictures that are almost the page's shape, like an iPad photo taken upright, get
+ * .fill (cover) so they reach every edge; only a few percent is trimmed.
+ * When the picture is turned 90/270 degrees we swap the box's width and height BEFORE rotating,
+ * so after rotation the box lines up with the frame again.
+ */
+.frame img {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100cqw;
+    height: 100cqh;
+    object-fit: contain;
+    transform: translate(-50%, -50%) rotate(var(--rotation, 0deg));
+    transition: transform .2s ease;
+    pointer-events: none;
+}
+
+.frame img.fill {
+    object-fit: cover;
+}
+
+.frame img.sideways {
+    width: 100cqh;
+    height: 100cqw;
+}
+
+.empty {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: var(--muted);
+    background: #f7f8fa;
+    font-size: clamp(9px, 9cqw, 18px);
+    line-height: 1.2;
+    padding: 4px;
+}
+
+.empty .plus {
+    font-size: 2.2em;
+    line-height: 1;
+}
+
+.empty .label {
+    font-weight: 600;
+    color: #666;
+}
+
+.empty .tap {
+    font-size: .75em;
+}
+
+.busy {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, .75);
+    font-size: clamp(9px, 9cqw, 16px);
+    color: #444;
+}
+
+/* ---------- Toolbar for the tapped picture ---------- */
+
+.toolbar {
+    position: fixed;
+    left: 50%;
+    bottom: max(16px, env(safe-area-inset-bottom));
+    transform: translateX(-50%);
+    z-index: 5;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    padding: 10px;
+    width: max-content;
+    max-width: calc(100% - 24px);
+    background: #333;
+    border-radius: 16px;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, .3);
+}
+
+.toolbar[hidden] {
+    display: none;
+}
+
+.toolbar-label {
+    color: #fff;
+    font-weight: 600;
+    padding: 0 6px;
+}
+
+.toolbar [data-action^="rotate"] {
+    font-size: 1.4rem;
+    min-width: 52px;
+}
+
+button.danger {
+    color: var(--danger);
+}
+
+.toast {
+    position: fixed;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: calc(100% - 32px);
+    padding: 12px 16px;
+    background: #333;
+    color: #fff;
+    border-radius: 10px;
+    z-index: 10;
+}
+
+.toast[hidden] {
+    display: none;
+}
+
+/* ---------- Printing: exactly one A4 landscape sheet ---------- */
+
+@page {
+    size: A4 landscape;
+    margin: 0;
+}
+
+@media print {
+    body {
+        background: #fff;
+    }
+
+    .topbar, .hint, .tip, .option, .toolbar, .toast {
+        display: none !important;
+    }
+
+    main {
+        padding: 0;
+        margin: 0;
+        max-width: none;
+    }
+
+    .sheet {
+        width: 297mm;
+        height: 210mm;
+        aspect-ratio: auto;
+        box-shadow: none;
+    }
+
+    .panel {
+        border: .2mm dashed #d0d0d0;
+        outline: none !important;
+    }
+
+    .frame img {
+        transition: none;
+    }
+
+    .empty {
+        display: none;
+    }
+
+    /* The top row is upside down on the sheet so the pages face the right way after folding. */
+    .sheet.flip-top .panel.top {
+        transform: rotate(180deg);
+    }
+
+    * {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+}
